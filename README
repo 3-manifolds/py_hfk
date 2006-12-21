@@ -1,0 +1,70 @@
+=======================================================
+COPYRIGHT NOTICE
+This package is derived from code written by John A. Baldwin and
+W. D. Gillam. ( http://www.math.columbia.edu/~wgillam/hfk )
+Modifications and extensions to the original code were written by
+Marc Culler, who was granted permission to modify and distribute the
+derived version by the original authors.  However, this permission is
+not transferable, and all rights to the code belong to Baldwin and
+Gillam.
+=======================================================
+
+The C++ code in this package requires gcc version > 3.0.
+
+The file hfk_class.cpp defines a C++ class whose objects
+are constructed from two permutations describing a grid
+projection of a link.  The constructor for this class
+calculates the ranks of the non-zero groups of the Heegaard
+Floer link homology, and saves them as data in the object.
+
+The file hfkdemo.cpp gives an example of how to use this class
+in a C++ program.  To compile:
+
+g++ -o hfkdemo -O3 hfkdemo.cpp
+
+The directory hfk contains a python package which encapsulates the hfk
+class.  It can be used as a command line calculator from within the
+python intepreter, it can be used in a simple python script for doing
+batch computations, or as part of a larger python program.
+
+To install the python package as root:
+python setup.py install
+
+To install in your home directory:
+python setup.py install --home ~
+
+(Make sure ~/bin is in your PATH and ~/lib/python is in your PYTHON_PATH).
+
+A sample session using the python interpreter is shown below:
+
+$ python
+Python 2.3 (#3, Dec 11 2006, 10:05:13) 
+[GCC 3.2.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from hfk import *
+>>> D = HFK([3,5,6,9,1,2,10,7,4,8,0],[6,7,10,2,4,0,8,3,9,1,5])
+>>> D
+ .  .  .  X  .  .  O  .  .  .  . 
+ .  .  .  .  .  X  .  O  .  .  . 
+ .  .  .  .  .  .  X  .  .  .  O 
+ .  .  O  .  .  .  .  .  .  X  . 
+ .  X  .  .  O  .  .  .  .  .  . 
+ O  .  X  .  .  .  .  .  .  .  . 
+ .  .  .  .  .  .  .  .  O  .  X 
+ .  .  .  O  .  .  .  X  .  .  . 
+ .  .  .  .  X  .  .  .  .  O  . 
+ .  O  .  .  .  .  .  .  X  .  . 
+ X  .  .  .  .  O  .  .  .  .  . 
+
+>>> D.HFK_ranks()
+Constructing vertices ...  100% Number of vertices: 14377
+Constructing edges ...  100% Number of edges: 46703
+Reducing graph ... 100% 
+
+  0  0  0  0  3
+  0  0  0 10  0
+  0  0 13  0  0
+  0 10  0  0  0
+  3  0  0  0  0
+
+>>> 
