@@ -2,7 +2,7 @@
 //
 // This code is derived, with the permission of the authors,
 // from code written by John A. Baldwin and William D. Gillam
-// who retain all rights to the code.
+// who retain all rights to their code.
 
 #include <iostream>
 #include <iomanip>
