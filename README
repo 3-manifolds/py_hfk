@@ -1,15 +1,17 @@
 =======================================================
 COPYRIGHT NOTICE
 This package is derived from code written by John A. Baldwin and
-W. D. Gillam. ( http://www.math.columbia.edu/~wgillam/hfk )
-Modifications and extensions to the original code were written by
-Marc Culler, who was granted permission to modify and distribute the
-derived version by the original authors.  However, this permission is
-not transferable, and all rights to the code belong to Baldwin and
-Gillam.
+W. D. Gillam. ( http://www.math.columbia.edu/~wgillam/hfk ) It
+includes modifications and extensions to the original code which were
+written by Marc Culler, who was granted permission to modify and
+distribute the derived version by the original authors.  However, this
+permission is not transferable, and all rights to the original code
+are retained by Baldwin and Gillam.
 =======================================================
 
 The C++ code in this package requires gcc version > 3.0.
+It uses features of the STL library which are not available
+in gcc-2.95.
 
 The file hfk_class.cpp defines a C++ class whose objects
 are constructed from two permutations describing a grid
