@@ -96,8 +96,8 @@ static PyObject *HFKhat(PyObject *self, PyObject *args, PyObject *keywds){
 
     result = PyDict_New();
     if ( result && !link.aborted ) {
-      for(a = -link.HFK_Asize; a <= link.HFK_Asize; a++) {
-	for(m = -link.HFK_Msize - gridsize; m <= link.HFK_Msize + gridsize; m++) {
+      for(a = -link.HFK_maxA; a <= link.HFK_maxA; a++) {
+	for(m = link.HFK_minM; m <= link.HFK_maxM; m++) {
 	  if ( link.HFK_Rank(m,a) != 0 ) {
 	    PyDict_SetItem(result, 
 			   Py_BuildValue("(ii)", m, a),

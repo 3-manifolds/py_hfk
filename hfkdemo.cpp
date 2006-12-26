@@ -50,8 +50,8 @@ int main(int argc, char *argv[]){
   }
 
   cout << "\nHFK^ ranks:\n";
-  for(a = link.HFK_Asize; a >= -link.HFK_Asize; a--) {
-    for(m = -link.HFK_Msize; m <= link.HFK_Msize; m++)
+  for(a = link.HFK_maxA; a >= -link.HFK_maxA; a--) {
+    for(m = link.HFK_minM; m <= link.HFK_maxM; m++)
       cout << setw(3) << link.HFK_Rank(m,a);
     cout << "\n";
   }

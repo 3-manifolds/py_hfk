@@ -2,7 +2,7 @@
 //
 // This code is derived, with the permission of the authors,
 // from code written by John A. Baldwin and William D. Gillam
-// who retain all rights to their code.
+// who retain all rights to the code.
 
 #include <iostream>
 #include <iomanip>
@@ -62,8 +62,9 @@ public:
   int *black;
   int *white;
   int Ashift;
-  int HFK_Asize;
-  int HFK_Msize;
+  int HFK_maxA;
+  int HFK_minM;
+  int HFK_maxM;
   int aborted;
   int WindingNumber(int x, int y);
   int MaslovGrading(int g[]);
@@ -172,7 +173,6 @@ Link::Link(int gridsize,
   white(white),
   Progress(Progress),
   quiet(quiet){
-
     MOS_Array = NULL;
     HFK_Array = NULL;
     Graph.resize(4*gridsize);
@@ -185,8 +185,6 @@ Link::Link(int gridsize,
     ComputeMOSRanks();
     HFK_Array = new BiArray(MOS.maxM+gridsize, MOS.maxA+gridsize);
     ComputeHFKRanks();
-    HFK_Asize = MOS.maxA;
-    HFK_Msize = MOS.maxM;
   };
 
 Link::~Link(){
@@ -220,6 +218,7 @@ int Link::AlexanderShift(){
     WN += WindingNumber((i+1)%gridsize, white[i]);
     WN += WindingNumber((i+1)%gridsize, (white[i]+1)%gridsize);
   }
+  /*
   if ( WN > 0 ) {
     int *temp;
     temp = black;
@@ -227,6 +226,7 @@ int Link::AlexanderShift(){
     white = temp;
     WN = -WN;
   }
+  */
   shift = (WN - 4 * gridsize + 4)/8;
   if (!quiet)
     cout << "Alexander Grading Shift: " << shift << "\n";
@@ -616,6 +616,26 @@ void Link::ComputeHFKRanks(){
   for(a = 1; a <= MOS.maxA; a++)
     for(m = -MOS.maxM - gridsize; m <= MOS.maxM + gridsize - 2*MOS.maxA; m++)
       (*HFK_Array)(m,-a) = (*HFK_Array)(m + 2*a, a);
+
+    HFK_maxA = MOS.maxA;
+    HFK_minM = 0;
+    HFK_maxM = 0;
+    for (m = -MOS.maxM - gridsize; m <=0; m++) {
+      for (a = -MOS.maxA; a <= MOS.maxA; a++)
+	if ( (*HFK_Array)(m,a) ) {
+	  HFK_minM = m;
+	  break;
+	}
+      if (HFK_minM) break;
+    }
+    for (m = MOS.maxM + gridsize; m >=0; m--) {
+      for (a = MOS.maxA; a >= MOS.maxA; a--)
+	if ( (*HFK_Array)(m,a) ) {
+	  HFK_maxM = m;
+	  break;
+	}
+      if (HFK_maxM ) break;
+    }
 }
 
 int Link::MOS_Rank(int m, int a) {
