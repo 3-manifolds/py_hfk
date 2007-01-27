@@ -1,3 +1,4 @@
+/* $Author$ $Date$ $Revision$ */
 #include "Python.h"
 #include "hfk_class.cpp"
 
@@ -58,8 +59,8 @@ static PyObject *HFKhat(PyObject *self, PyObject *args, PyObject *keywds){
   }
 
   {
-    int Xlist[gridsize];
-    int Olist[gridsize];
+    int Xlist[16];
+    int Olist[16];
     int i, m, a, failed = 0;
     PyObject *item;
 
