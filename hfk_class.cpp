@@ -1,3 +1,4 @@
+// $Author$ $Date$ $Revision$
 // C++ class to compute Heegaard Floer knot homology.
 //
 // This code is derived, with the permission of the authors,
@@ -12,21 +13,15 @@
 #include <list>
 using namespace std;
 
-#if defined(__GNUC__)
-typedef long long int Int64;
-#elif defined(_MSC_VER)
-typedef __int64 Int64;
-#endif
-
 // Class Declarations
 
 class Vertex {
 public:
-  Int64 perm;
+  long long perm;
   list<int> out;
   list<int> in;
   bool alive;
-  Vertex(Int64 p);
+  Vertex(long long p);
   ~Vertex();
 };
 
@@ -84,7 +79,7 @@ public:
   ~Link();
 private:
   int graphsize;
-  vector < vector <Int64> > Generators;
+  vector < vector <long long> > Generators;
   vector < vector <Vertex> > Graph;
   Homology MOS;
   unsigned char Rectangles[16*16*16*16];
@@ -92,9 +87,6 @@ private:
   BiArray *HFK_Array;
   int (*Progress)(const char *message, int percent);
   bool quiet;
-  short *counter;
-  int *g;
-  int *gij;
   int  AlexanderShift();
   int  RectDotFree(int xll, int yll, int xur, int yur, int which);
   int  BuildVertices();
@@ -107,28 +99,22 @@ private:
 };
 
 // Function Prototypes
-void      Int2Perm(Int64 k, int h [], int size);
-Int64     Perm2Int(int y [], int size);
-void      NextPerm(short *counter, int *h, int size);
+void      Int2Perm(long long k, int h [], int size);
+long long Perm2Int(int y [], int size);
+void      NextPerm(short counter[], int h[], int size);
 bool      ValidGrid(int gridsize, int black[], int white[]);
-int       Find(vector <Vertex> &V, Int64 x);
+int       Find(vector <Vertex> &V, long long x);
 
 // Global Data
 
-#if defined(__GNUC__)
-Int64 Factorial[16] = {
+long long Factorial[16] = {
   1LL,1LL,2LL,6LL,24LL,120LL,720LL,5040LL,40320LL,362880LL,3628800LL,
   39916800LL,479001600LL,6227020800LL,87178291200LL,1307674368000LL};
-#elif defined(_MSC_VER)
-Int64 Factorial[16] = {
-  1,1,2,6,24,120,720,5040,40320,362880,3628800,
-  39916800,479001600,6227020800,87178291200,1307674368000};
-#endif
 
 #define Binomial(n,k) (Factorial[n]/(Factorial[k]*Factorial[n-k]))
 
 // Class Methods
-Vertex::Vertex(Int64 p): perm(p){
+Vertex::Vertex(long long p): perm(p){
   alive = 1;
 }
 
@@ -194,10 +180,7 @@ Link::Link(int gridsize,
     Generators.resize(4*gridsize);
     Ashift = AlexanderShift();
     BuildRectangles();
-    counter = new short [gridsize-1];
-    g = new int [gridsize];
-    gij = new int [gridsize];
-    aborted = ( gridsize > 16 || BuildVertices() || FindHomology() );
+    aborted = ( BuildVertices() || FindHomology() );
     if (aborted )return;
     MOS_Array = new BiArray(MOS.maxM, MOS.maxA);
     ComputeMOSRanks();
@@ -208,9 +191,6 @@ Link::Link(int gridsize,
 Link::~Link(){
   if (MOS_Array) delete MOS_Array;
   if (HFK_Array) delete HFK_Array;
-  delete [] counter;
-  delete [] g;
-  delete [] gij;
 };
 
 // Compute winding number around (x,y)
@@ -355,9 +335,11 @@ int Link::MaslovGrading(int g[]) {
 // grading.
 int Link::BuildVertices() {
   int i, AGrading, percent;
-  Int64 count = 0, end = 0, step;
+  long long count = 0, end = 0, step;
+  short counter[gridsize-1];
+  int winding_numbers[gridsize][gridsize];
+  int g[gridsize];
   stringstream msg;
-  int winding_numbers[16][16];
 
   msg << "Constructing generators ... ";
 
@@ -389,7 +371,7 @@ int Link::BuildVertices() {
     percent = count/(Factorial[gridsize]/100);
     if ( Progress(msg.str().c_str(), max(percent,1)) )
       return -1;
-     //This loop accounts for most of the computation.
+    //This loop accounts for most of the computation.
     for(; count < end; count++) {
       NextPerm(counter, g, gridsize);
       AGrading = Ashift;
@@ -433,6 +415,8 @@ int Link::BuildEdges(int MM, const char *msg, int *count) {
   int index = 0, edges = 0, end = 0, step, percent;
   bool firstrect = 0;
   bool secondrect = 0;
+  int g[gridsize];
+  int gij[gridsize];
 
   step = min(20000, (int)Graph[MM].size());
 
@@ -452,28 +436,28 @@ int Link::BuildEdges(int MM, const char *msg, int *count) {
 	    rectinfo = Rectangles[i<<12 | Gi<<8 | j<<4 | Gj];
 	    firstrect = rectinfo & 1;
 	    for(k=i+1; k<j && firstrect; k++) {
-	      firstrect = !(Gi < g[k] & g[k] < Gj);
+	      firstrect = !((Gi < g[k]) & (g[k] < Gj));
 	    }
 	    secondrect = rectinfo & 2;
 	    for(k=0; k<i && secondrect; k++) {
-	      secondrect = !(g[k] < Gi | g[k] > Gj);
+	      secondrect = !((g[k] < Gi) | (g[k] > Gj));
 	    }
 	    for(k=j+1; k<gridsize && secondrect; k++) {
-	      secondrect = !(g[k] < Gi | g[k] > Gj);
+	      secondrect = !((g[k] < Gi) | (g[k] > Gj));
 	    }
 	  }
 	  if(Gj < Gi) {
 	    rectinfo = Rectangles[i<<12 | Gj<<8 | j<<4 | Gi];
 	    firstrect = rectinfo & 4;
 	    for(k=i+1; k<j && firstrect; k++) {
-	      firstrect = !(g[k] < Gj | g[k] > Gi);
+	      firstrect = !((g[k] < Gj) | (g[k] > Gi));
 	    }
 	    secondrect = rectinfo & 8;
 	    for(k=0; k<i && secondrect; k++) {
-	      secondrect = !(g[k] > Gj & g[k] < Gi);
+	      secondrect = !((g[k] > Gj) & (g[k] < Gi));
 	    }
 	    for(k=j+1; k<gridsize && secondrect; k++) {
-	      secondrect = !(g[k] > Gj & g[k] < Gi);
+	      secondrect = !((g[k] > Gj) & (g[k] < Gi));
 	    }
 	  }
 	  if(firstrect != secondrect) { // Exactly one rectangle is a boundary
@@ -526,13 +510,15 @@ int Link::Reduce(int MM, const char *msg, int *count){
 	for(list<int>::iterator k = Graph[MM][source].out.begin();
 	    k != Graph[MM][source].out.end(); k++) {
 	  // Search for j->k. If found, remove it; if not, add it.
-	  list<int>::iterator search = 
-	    find( Graph[MM][*j].out.begin(), Graph[MM][*j].out.end(), *k);
-	  if( search != Graph[MM][*j].out.end() ) {
-	    Graph[MM][*j].out.erase( search );
-	    if( *k != target) Graph[MM-1][*k].in.remove(*j);
-	  }
-	  else {
+	  list<int>::iterator search;
+	  for (search = Graph[MM][*j].out.begin();
+               search != Graph[MM][*j].out.end(); search++)
+            if (*search == *k){
+	       Graph[MM][*j].out.erase(search);
+	       if( *k != target) Graph[MM-1][*k].in.remove(*j);
+               break;
+	    }
+	  if (search == Graph[MM][*j].out.end()) {
 	    Graph[MM][*j].out.push_back(*k);
 	    Graph[MM-1][*k].in.push_back(*j);
 	  } 
@@ -557,6 +543,7 @@ int Link::Reduce(int MM, const char *msg, int *count){
 }
 
 int Link::FindHomology() {
+  int  g[gridsize];
   int i, j, count=0, MM;
   const char *msg="Computing homology ...";
 
@@ -663,7 +650,7 @@ int Link::HFK_Rank(int m, int a) {
 }
 
 // Returns i if V[i]=x or -1 if x isn't a member of V.
-int Find(vector <Vertex> &V, Int64 x) {
+int Find(vector <Vertex> &V, long long x) {
   int above=V.size()-1;
   int below=0;
   while(above - below > 1) {
@@ -694,8 +681,8 @@ bool ValidGrid(int gridsize, int black[], int white[]) {
 
 // Maps a permutation of size n to an integer < n!
 // See: Knuth, Volume 2, Section 3.3.2, Algorithm P
-Int64 Perm2Int(int Perm[], int size) {
- Int64 Int=0;
+long long Perm2Int(int Perm[], int size) {
+ long long Int=0;
  int temp, m, r = size;
  while (r > 0){
    for (m=0; m < r; m++){
@@ -713,7 +700,7 @@ Int64 Perm2Int(int Perm[], int size) {
 
 // Inverse mapping, from integers < n! to permutations of size n
 // Writes the permutation corresponding to Int into the array Perm.
-void Int2Perm(Int64 Int, int Perm[], int size) {
+void Int2Perm(long long Int, int Perm[], int size) {
   int r, m, temp;
   for(int i=0; i<size; i++) Perm[i]=i;
   r = 1;

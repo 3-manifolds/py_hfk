@@ -1,7 +1,11 @@
 #include "Python.h"
 #include "hfk_class.cpp"
 
+#if defined(__GNUC__)
 extern "C" void init_hfk(void);
+#elif defined(_MSC_VER)
+DL_EXPORT(void) init_hfk(void);
+#endif
 
 static PyObject *ErrorObject;
 static PyObject *callback;
