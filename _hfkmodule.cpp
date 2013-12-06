@@ -2,6 +2,11 @@
 #include "Python.h"
 #include "hfk_class.cpp"
 
+/*
+ * The casts to char* or char** will need to be removed after  changes to
+ * the python API propagate.  11/15/2013
+ */
+  
 #if defined(__GNUC__)
 extern "C" void init_hfk(void);
 #elif defined(_MSC_VER)
@@ -33,9 +38,9 @@ static PyObject *HFKhat(PyObject *self, PyObject *args, PyObject *keywds){
   PyObject *result;
   int quiet = 1;
   int gridsize;
-  static char *kwlist[] = {"Xlist", "Olist", "progress", "quiet", NULL};
+  static const char* kwlist[] = {"Xlist", "Olist", "progress", "quiet", NULL};
 
-  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "OO|Oi:HFKhat", kwlist,
+  if ( !PyArg_ParseTupleAndKeywords(args, keywds, "OO|Oi:HFKhat", (char **)kwlist,
 	      &py_Xlist, &py_Olist, &py_callback, &quiet) )
     return NULL;
 
@@ -151,12 +156,14 @@ DL_EXPORT(void)
 init_hfk(void)
 {
 	PyObject *m, *d;
+	const char *hfk_error_name = "HFK_Error";
+	const char *hfk_dot_error = "hfk.error";
 
 	/* Create the module and add the functions */
 	m = Py_InitModule("_hfk", _hfk_methods);
 
 	/* Add some symbolic constants to the module */
 	d = PyModule_GetDict(m);
-	ErrorObject = PyErr_NewException("hfk.error", NULL, NULL);
-	PyDict_SetItemString(d, "HFK_Error", ErrorObject);
+	ErrorObject = PyErr_NewException((char *)hfk_dot_error, NULL, NULL);
+	PyDict_SetItemString(d, hfk_error_name, ErrorObject);
 }
