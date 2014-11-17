@@ -440,11 +440,7 @@ int Link::BuildEdges(int MM, const char *msg, int *count) {
   // Add the edges.
   while (end < (int)Graph[MM].size()) {
     end = min(index + step, (int)Graph[MM].size());
-<<<<<<< local
-    percent = (*count + index)/(1 + graphsize/50);
-=======
-    percent = int(50.0*(*count + index)/(float)graphsize);
->>>>>>> other
+    percent = (int)((*count + index)/(1 + float(graphsize)/50));
     if ( Progress(msg, max(1, percent)) )
       return -1;
     for(; index < end; index++) {
@@ -513,11 +509,7 @@ int Link::Reduce(int MM, const char *msg, int *count){
 
   while (end < (int)Graph[MM].size()) {
     end = min(source + step, (int) Graph[MM].size());
-<<<<<<< local
-    percent = (*count + source)/(1 + graphsize/50);
-=======
-    percent = (int)50.0*(*count + source)/((float)graphsize);
->>>>>>> other
+    percent = (int)((*count + source)/(1 + float(graphsize)/50));
     if ( Progress(msg, max(1,percent)) )
       return -1;
     for(; source<end; source++) {
