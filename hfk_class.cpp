@@ -387,7 +387,7 @@ int Link::BuildVertices() {
     end = count + step;
     if (end > Factorial[gridsize])
       end = Factorial[gridsize];
-    percent = count/(Factorial[gridsize]/100);
+    percent = (int)(100.0*(count/(float)Factorial[gridsize]));
     if ( Progress(msg.str().c_str(), max(percent,1)) )
       return -1;
      //This loop accounts for most of the computation.
@@ -440,7 +440,11 @@ int Link::BuildEdges(int MM, const char *msg, int *count) {
   // Add the edges.
   while (end < (int)Graph[MM].size()) {
     end = min(index + step, (int)Graph[MM].size());
+<<<<<<< local
     percent = (*count + index)/(1 + graphsize/50);
+=======
+    percent = int(50.0*(*count + index)/(float)graphsize);
+>>>>>>> other
     if ( Progress(msg, max(1, percent)) )
       return -1;
     for(; index < end; index++) {
@@ -509,7 +513,11 @@ int Link::Reduce(int MM, const char *msg, int *count){
 
   while (end < (int)Graph[MM].size()) {
     end = min(source + step, (int) Graph[MM].size());
+<<<<<<< local
     percent = (*count + source)/(1 + graphsize/50);
+=======
+    percent = (int)50.0*(*count + source)/((float)graphsize);
+>>>>>>> other
     if ( Progress(msg, max(1,percent)) )
       return -1;
     for(; source<end; source++) {
