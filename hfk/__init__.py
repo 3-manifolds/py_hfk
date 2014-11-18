@@ -1,8 +1,8 @@
 from hfk._hfk import HFKhat
 from sys import stdout
 
-from Tkinter import Tk, Frame, Canvas, Button, IntVar, Text
-from Tkinter import END, ACTIVE, DISABLED
+from Tkinter import Tk, Toplevel, Frame, Canvas, Button, IntVar, Text
+from Tkinter import END, ACTIVE, NORMAL, DISABLED
 
 __all__ = ['HFK', 'TkHFK']
 
@@ -52,7 +52,7 @@ class HFK:
     def HFK_ranks(self):
         """
         Print the matrix of HFK^ ranks.
-         
+        
         Calls compute_HFK_ranks if necessary.
         """
         if self.hfk_dict == None:
@@ -125,11 +125,18 @@ class TkHFK(HFK):
     Subclass of HFK that uses a TkInter progress dialog.
     """
 
+    def __init__(self, Xlist, Olist, name=None, master=None):
+        HFK.__init__(self, Xlist, Olist, name)
+        self.master = master
+
     def compute_HFK_ranks(self):
         """
         Fill in the hfk_dict dictionary.
         """
-        self.window = Tk()
+        if self.master:
+            self.window = Toplevel(self.master)
+        else:
+            self.window = Tk()
         if self.name:
             self.window.title(self.name)
         else:
@@ -137,7 +144,8 @@ class TkHFK(HFK):
         self.bar = Progressbar(self.window)
         self.bar.pack(padx=10, pady=10)
         self.text = Text(self.window, font='Courier 16',
-                         width=40, height=18, padx=10)
+                         width=40, height=18, padx=10,
+                         state=DISABLED)
         self.text.pack(fill='x', padx=10, pady=10)
         button = Button(self.window, text="Stop", default=ACTIVE,
                         command=self.abort) 
@@ -147,22 +155,29 @@ class TkHFK(HFK):
         self.done.set(0)
         self.window.waitvar(self.done)
         button.config(state=DISABLED)
+        self.window.update_idletasks()
 
     def HFK_ranks(self):
         if self.hfk_dict == None:
             self.compute_HFK_ranks()
             if self.aborted:
+                self.text.config(state=NORMAL)
                 self.text.insert(END, 'Computation aborted!\n')
+                self.text.config(state=DISABLED)
                 self.aborted = 0
                 self.hfk_dict=None
         if self.hfk_dict:
+            self.text.config(state=NORMAL)
             self.text.insert(END, 'X=%s\n'%str(self.Xlist).replace(', ',','))
             self.text.insert(END, 'O=%s\n'%str(self.Olist).replace(', ',','))
             self.text.insert(END, '\nMatrix of HFK^ ranks:\n')
             self.text.insert(END, self.HFK_ranks_str()+'\n')
+            self.text.config(state=DISABLED)
 
     def finished(self):
         self.done.set(1)
+        self.window.focus_set()
+        self.window.update_idletasks()
 
     def abort(self):
         self.aborted=1
@@ -170,10 +185,12 @@ class TkHFK(HFK):
     def progress(self, message, percent):
         if percent < 0:
             self.bar.set("Done.")
-            self.text.insert(END, message+'\n')                
+            self.text.config(state=NORMAL)
+            self.text.insert(END, message+'\n')
+            self.text.config(state=DISABLED)
         else:
             self.bar.set(message, percent)
-        self.window.update()
+        self.window.update_idletasks()
         return self.aborted
 
 
